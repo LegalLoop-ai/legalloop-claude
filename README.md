@@ -14,7 +14,7 @@ Legal Loop runs no AI on its servers. The determination is a deterministic trave
 ## Install (Claude Code)
 
 ```
-/plugin marketplace add LegalLoop-ai/legalloop-claude
+/plugin marketplace add https://github.com/LegalLoop-ai/legalloop-claude
 /plugin install legalloop
 ```
 
