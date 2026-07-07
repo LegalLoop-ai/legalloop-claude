@@ -1,0 +1,18 @@
+{
+  "name": "legalloop",
+  "owner": {
+    "name": "Legal Loop",
+    "email": "hello@legalloop.ai"
+  },
+  "metadata": {
+    "description": "The legal API for the agent era. Deterministic, citation-backed legal answers for your AI.",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "legalloop",
+      "source": "./plugins/legalloop",
+      "description": "Legal Loop: deterministic, citation-backed legal determinations. Installs the /legalloop:ll skill and connects the Legal Loop MCP (mcp.legalloop.ai) in one step."
+    }
+  ]
+}
