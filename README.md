@@ -18,7 +18,7 @@ Legal Loop runs no AI on its servers. The determination is a deterministic trave
 /plugin install legalloop
 ```
 
-That is everything. The skill and the MCP are both live. On first use, the MCP will prompt you to sign in through your browser (OAuth); use your Legal Loop account.
+When prompted, confirm the plugin reload (or restart Claude Code) — the skill and the MCP activate after the reload. On first use, the MCP will prompt you to sign in through your browser (OAuth); use your Legal Loop account.
 
 Ask a legal question in plain language and the skill takes over:
 
