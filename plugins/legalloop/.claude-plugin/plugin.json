@@ -1,7 +1,7 @@
 {
   "name": "legalloop",
   "description": "Deterministic, citation-backed legal determinations for your AI. Bundles the /legalloop:ll skill and the Legal Loop MCP connector.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Legal Loop",
     "email": "hello@legalloop.ai"
