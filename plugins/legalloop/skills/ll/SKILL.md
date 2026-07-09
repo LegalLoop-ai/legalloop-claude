@@ -1,5 +1,6 @@
 ---
 name: ll
+version: 1.0.3
 description: Use this whenever the user asks a legal, privacy, compliance, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, and 64 codified frameworks across 14 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", or any "is X legal / required / compliant" question.
 ---
 
