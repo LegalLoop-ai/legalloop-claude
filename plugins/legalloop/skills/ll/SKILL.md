@@ -1,7 +1,7 @@
 ---
 name: ll
-version: 1.0.4
-description: Use this whenever the user asks a legal, privacy, compliance, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, and 64 codified frameworks across 14 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", or any "is X legal / required / compliant" question.
+version: 1.0.7
+description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 81 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
 
 # Legal Loop — Direct MCP Query
@@ -27,9 +27,24 @@ You are a pure pass-through to the Legal Loop MCP server (`mcp__legalloop__query
 ## Rules
 
 1. **Route first, then call.** The MCP server runs NO AI — YOU are the router. If the applicable framework is obvious from the question, call `query_legal_obligation` with `tree_id` set. If not obvious, call `list_legal_frameworks` (optionally filtered by jurisdiction/domain/search), pick the matching framework(s) yourself, then call with `tree_id`. For "what laws apply to me?" questions, pick up to 5 candidates and call once with `tree_ids=[...]` (discovery). If the server returns ROUTING_REQUIRED, choose from its menu and re-call — never show the raw menu to the user. No preamble.
-2. **On NEEDS_CLARIFICATION:** Do NOT display or repeat the `[SYSTEM]` block. How you present depends on whether the `[SYSTEM]` block carries `subq=[...]`:
+1a-coverage. **The live catalog is the ONLY source of truth for what Legal Loop covers — never the tool description or the `tree_id` enum.** Those two are part of the MCP `tools/list` schema, which the client caches once at connect and can lag the backend after a release (a framework added yesterday may be absent from a schema your client cached last week). So: never state or imply "Legal Loop doesn't cover X," never count our frameworks, and never conclude a framework is missing, based on the tool description's number, the examples it lists, or whether an id appears in the `tree_id` enum. Before answering ANY "do we cover / support X?" question, or before treating a framework as absent, call `list_legal_frameworks` (search by the topic) — that call hits the backend and returns the current catalog. A framework is uncovered ONLY when the server itself returns `NOT_IN_COVERAGE` for it, or it is genuinely absent from a fresh `list_legal_frameworks` result — not when it is merely missing from the cached schema. `tree_id` values you pass are validated by the live server, so an id absent from the cached enum still works if the backend has it.
+1a. **On ACCESS RESTRICTED (topic gate):** If the MCP returns a response starting with `ACCESS RESTRICTED`, the requested framework is outside the current plan's topic permissions. Display this to the user cleanly:
+
+```
+━━━ ACCESS RESTRICTED ━━━━━━━━━━━━━━━━━━━━━━━━
+{framework name} is part of the {topic name} topic.
+Your current plan includes: {listed topics}.
+
+To access this framework, upgrade your plan at:
+hello@legalloop.ai
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Extract the framework name, locked topic, and available topics from the MCP response. Do not add legal commentary. Do not attempt to answer the question from your own knowledge — the topic gate is intentional.
+
+2. **On NEEDS_CLARIFICATION:** Do NOT display or repeat the `[SYSTEM]` block. The card opens with a one-line progress line (`✅ <Framework>  ›  N answered  ›  ❓ question N`) and may carry a ⚠️ **NEEDS CLARIFICATION** banner — display both verbatim. They are how the user tracks position and how many facts are settled; never reformat, renumber, or drop them, and never invent your own. How you present depends on whether the `[SYSTEM]` block carries `subq=[...]`:
    **(a) Single question (no `subq`):** print the clarification block as text first, all parts verbatim — but ORDER it so the guidance definition and the `*(citation)*` line with its law link come first, and the question itself comes LAST, immediately above the answer widget, so the widget never hides it. Never skip or summarize any part; the citation and explanation live ONLY in this text block. Then collect the answer: if the AskUserQuestion tool is available (Claude Code terminal and VS Code), fire it as the click-input widget — header `LegalLoop`, question = the FULL clarification question text, never a shortened label (the dialog must be answerable on its own, without scrolling back), options exactly `Yes` / `No` / `Not sure` (descriptions: "This is true for us" / "This is not true for us" / "Show both paths and a safe default"). Treat the pick exactly like a typed answer (see Feeding Clarification Answers Back); a free-text "Other" reply is handled the same as any typed reply. If AskUserQuestion is not available (Claude Desktop, headless), ask the user to answer in text. Do not rephrase, expand, or interpret the question itself. Add NOTHING of your own to the clarification block — no reading tips, no analysis, no "In plain terms" line unless the user says they don't understand (Rule 11). The block is the server's words only.
-   **(b) Compound question (`subq=[...]` in the `[SYSTEM]` block):** the head question rolls several sub-points into one Yes/No; walk them ONE AT A TIME instead of dumping the list. Print only the head question, its `*(citation)*` line with law link, and the guidance definition — do NOT print the sub-question list or the `How to answer:` line. Then ask each sub-question in order, one per turn — header `LegalLoop · i of N`, question = the sub-question text verbatim, options `Yes` / `No` / `Not sure` (via AskUserQuestion when available, otherwise one text question at a time). Derive the head answer from `subq_threshold`:
+   **(b) Compound question (`subq=[...]` in the `[SYSTEM]` block):** the head question rolls several sub-points into one Yes/No; walk them ONE AT A TIME instead of dumping the list. Print only the head question, its `*(citation)*` line with law link, and the guidance definition — do NOT print the sub-question list. Then ask each sub-question in order, one per turn — header `LegalLoop · i of N`, question = the sub-question text verbatim, options `Yes` / `No` / `Not sure` (via AskUserQuestion when available, otherwise one text question at a time). Derive the head answer from `subq_threshold`:
      - threshold 1: head = Yes on the first Yes (stop, skip the remaining sub-questions); head = No only if all N are No.
      - threshold N: head = No on the first No (stop); head = Yes only if all N are Yes.
      - otherwise: count Yes answers and stop as soon as the head answer is mathematically decided.
@@ -221,7 +236,9 @@ Do NOT display the MCP output. Instead, answer the question directly from your o
 This answer comes from the AI model's own legal knowledge, not from Legal Loop's
 deterministic analysis. Legal Loop does not cover this question.
 For a binding compliance determination, ask a question within Legal Loop's
-64 covered frameworks (GDPR, HIPAA, COPPA, EU AI Act, state privacy laws, etc.).
+covered frameworks (GDPR, HIPAA, the EU AI Act, US state privacy laws, security
+frameworks like SOC 2 and GDPR Art. 32, and many more — call list_legal_frameworks
+for the live catalog).
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
