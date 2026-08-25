@@ -5,7 +5,7 @@ The legal API for the agent era. Deterministic, citation-backed legal answers fo
 This plugin installs, in one step:
 
 - The **`/legalloop:ll`** skill, which fires automatically on any legal, privacy, compliance, or security question and runs it through Legal Loop's deterministic engine.
-- The **Legal Loop MCP connector** (`mcp.legalloop.ai`), 81 codified frameworks across 16 jurisdictions.
+- The **Legal Loop MCP connector** (`mcp.legalloop.ai`), 97 codified frameworks across 16 jurisdictions.
 
 Legal Loop runs no AI on its servers. The determination is a deterministic traversal of encoded law. Your model routes the question; Legal Loop answers it.
 
