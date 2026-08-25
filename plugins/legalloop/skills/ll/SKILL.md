@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.15
+version: 1.0.17
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -60,10 +60,11 @@ Coverage  <N> frameworks encoded
 The engine version comes from the live server, so it reports what is actually running, not what your cached tool schema claims. If the two versions differ that is expected — the skill and the engine are versioned separately.
 
 0c. **Fill mode (a whole questionnaire).** When the user provides an entire questionnaire — a file, a pasted list of questions, or "fill this questionnaire" — do NOT answer inline question-by-question. Four stages:
+   0. **Getting the questionnaire:** accept a local file path, an uploaded file, pasted text, or a URL. For a Google Sheet URL, fetch it as CSV via `https://docs.google.com/spreadsheets/d/<ID>/export?format=csv` (add `&gid=<GID>` when the link carries one); for Google Docs use `/export?format=txt`. If the fetch fails the document is not link-shared — ask the user to share it or attach the file, and never guess its contents. State the source you actually read (URL or path) in the extraction summary.
    1. **Extract and confirm (one checkpoint):** read the document and extract every question — the document's own numbering, section, verbatim text, and answer format (yes/no, multiple choice, free text, evidence upload). Show ONE summary ("<N> questions found across <M> sections", with per-section counts) and ask the user to confirm before answering anything. Extraction errors get caught here, not after.
    2. **Batch answer:** call `answer_questionnaire_question` once per question, verbatim, same `client_id` throughout. Never skip, never reorder, never merge questions.
    3. **Review by exception — three queues, in this order:**
-      - **Bulk-keep:** answered, document-grade confidence, no compliance flag, no consistency note, not a suggested answer → ONE compact table (id · one-line answer) with a single keep-all confirmation. Any row the user names moves to the review queue instead.
+      - **Bulk-keep:** answered, no compliance flag, no consistency note, not a suggested answer, not evidence-required, AND settled confidence — either `document-grade` or `precedent-grade, corroborated` (the card states which) → ONE compact table (id · one-line answer) with a single keep-all confirmation. Any row the user names moves to the review queue instead. Single-source precedent facts never go here.
       - **Review:** suggested answers (privacy/AI), precedent-grade facts, and anything carrying a compliance flag or consistency note → individual cards, keep/edit/cancel each (same widget rules as clarification cards).
       - **Gaps, grouped last:** list the unanswered questions together; collect the user's answers; offer each collected answer back into the fact-base with the user as its source (the learn-back loop — the next questionnaire has fewer gaps by construction).
    4. **Export two artifacts:** (a) the filled answer sheet mapped 1:1 to the original numbering — kept/edited answers only, gaps explicitly marked, nothing the user cancelled; (b) a provenance appendix — every answer with its sources, confidence tier, and any flags. Deliver as files where the client supports it. Never submit anything to any portal yourself; the artifacts are the user's to transfer.
