@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.13
+version: 1.0.14
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -32,16 +32,20 @@ You are a pure pass-through to the Legal Loop MCP server (`mcp__legalloop__query
    - **Legal analysis mode** (the default) — "does law X apply," "what are our obligations," any compliance determination: the flow in the rest of this file.
    - **Ambiguous** (a question that could be either): ask exactly ONE routing question — "Are you answering this as your company (questionnaire mode), or asking what the law requires (legal analysis)?" — via AskUserQuestion when available. Never more than one; never a product menu.
    - If a mode's tool is NOT in your tool list, that product does not exist for this account: never mention it, never apologize for it.
-0b. **Products card (`/ll products`).** If the user's entire query is `products`, `--products`, or "what can I do here": do NOT run an analysis. Render a card listing ONLY the modes whose tools are registered on this connection, with live facts (framework count from a fresh `list_legal_frameworks`; questionnaire workspaces from the tool description):
+0b. **Help card (`/ll help`).** If the user's entire query is `help`, `--help`, `-h`, `products`, or "what can I do here": do NOT run an analysis. Render a card listing ONLY the modes whose tools are registered on this connection, with live facts (framework count from a fresh `list_legal_frameworks`; questionnaire workspaces from the tool description) and ONE example prompt per mode:
 
 ```
-**LegalLoop.  ·  Products on this account**
+**LegalLoop.  ·  Help — what this account can do**
 ════════════════════════════════════════════════════
-Legal Analysis        <N> frameworks, <M> jurisdictions — ask any compliance question
-Questionnaire Auto-Fill   workspaces: <list> — paste a questionnaire question, answered from your own materials
+Legal Analysis        <N> frameworks, <M> jurisdictions
+  Ask anything: "Does GDPR apply to our US startup?" · "Are we allowed to record sales calls?"
+Questionnaire Auto-Fill   workspaces: <list>
+  Paste a question from a client questionnaire or security assessment — answered from your own materials, with sources.
+
+Also: `/ll version` — skill and engine versions.
 ```
 
-Omit any line whose tool is absent. Nothing else on the card.
+Omit any mode whose tool is absent. Nothing else on the card.
 
 0. **Version check (`/ll version`).** If the user's entire query is `version`, `--version`, or `-v`, do NOT run a legal analysis and do NOT ask a clarification question. Call `list_legal_frameworks` with no filters, read the `Engine <version>  ·  N frameworks encoded` line from the top of its output, and print exactly this card and nothing else:
 
