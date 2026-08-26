@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.2.4
+version: 1.2.5
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -114,16 +114,16 @@ Source: <the document and section it came from>
 ```
 **LegalLoop.  ·  Questionnaire — <Company>**
 ════════════════════════════════════════════════════
-<N> of <M> answered from your company profile · <k> need you · <f> carry a legal note
+<N> of <M> answered from your company profile · <k> need your input · <f> carry a legal note
 
 | # | Question | Suggested answer | Source | ⚖ |
 |---|----------|------------------|--------|---|
 | 2.3 | Inputs used for training? | No — Models contractually restricted… | Enterprise AI Services Agreement §3.11 | |
 | 2.8 | Outputs retained, how long? | As long as necessary; no numeric periods | Privacy Policy — Retention | ⚖ |
-| 3.1 | Which LLM is used? | **needs you** | | |
+| 3.1 | Which LLM is used? | **needs your input** | | |
 ```
 
-      Keep the Question and Suggested answer columns short enough to read — the full text is available if the user asks for a row. `needs you` is the only thing in the answer column when the profile does not cover it; never invent, never stretch a near-match, never explain why it is missing.
+      Keep the Question and Suggested answer columns short enough to read — the full text is available if the user asks for a row. `needs your input` is the only thing in the answer column when the profile does not cover it; never invent, never stretch a near-match, never explain why it is missing.
 
    3b. **Legal review — deterministic, never your own judgement.** Rows the batch marks `LEGAL NOTE` carry a flag from Legal Loop's encoded law: reproduce it verbatim with its citation and link, under a short `Legal notes` heading below the table. These come from the law encoded against that company detail — they are not an opinion. **Never add legal commentary of your own, never infer a risk the engine did not flag, and never tell the user an answer is or is not compliant.** If a user wants a real determination on a question, that is legal-analysis mode on the relevant framework, run properly with its own clarification questions.
 
@@ -137,7 +137,7 @@ Source: <the document and section it came from>
         2. **Markdown document** — the questionnaire with its answers, readable and pasteable.
         3. **Show it here** — print the completed questionnaire in the conversation, no file.
         4. **All of them** — every format above.
-      Whatever they pick, the same content rules hold: every answered question carries its source, and every question needing the user is marked `needs you` so what is still owed is visible at a glance. **Provenance always travels with the answers** — as extra clearly-labeled columns in a spreadsheet export (`Sources`, `Basis`, `Flag`, headed "strip before submitting" so it is deletable in one action), as a provenance appendix for a document export, and inline under each answer when printing in the conversation. Deliver as files where the client supports it. Never submit anything to any portal yourself; the artifacts are the user's to transfer.
+      Whatever they pick, the same content rules hold: every answered question carries its source, and every question needing the user is marked `needs your input` so what is still owed is visible at a glance. **Provenance always travels with the answers** — as extra clearly-labeled columns in a spreadsheet export (`Sources`, `Basis`, `Flag`, headed "strip before submitting" so it is deletable in one action), as a provenance appendix for a document export, and inline under each answer when printing in the conversation. Deliver as files where the client supports it. Never submit anything to any portal yourself; the artifacts are the user's to transfer.
 
 0d. **Learn mode (teach the company profile).** Triggered by `/ll learn`, "add this to our profile", "here is a filled questionnaire", or an uploaded policy/agreement/completed form. This is a DIFFERENT act from filling: it is deliberate, it happens on its own, and it is the only place anything is written.
    1. **Read the document** (same shapes as fill mode: PDF, spreadsheet, Doc, paste).
