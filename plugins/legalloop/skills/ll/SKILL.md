@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.24
+version: 1.0.25
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -78,7 +78,7 @@ The engine version comes from the live server, so it reports what is actually ru
       - **Google Doc URL:** `/export?format=txt`. **Word doc:** read the file directly.
       - **Pasted text:** treat the paste as the document.
       If a URL fetch fails, the document is not link-shared — ask the user to share it or attach the file, and never guess its contents. Always state the source you actually read (URL or path) in the extraction summary.
-   1. **Extract and confirm (one checkpoint):** read the document and extract every question — the document's own numbering, section, verbatim text, and answer format (yes/no, multiple choice, free text, evidence upload). Show ONE summary ("<N> questions found across <M> sections", with per-section counts) and ask the user to confirm before answering anything. Extraction errors get caught here, not after.
+   1. **Extract and confirm (one checkpoint) — keep it short.** Read the document and extract every question: its own numbering, section, verbatim text, and answer format. Then show a SHORT summary — the source you read, the total, the per-section counts, and the question "start?" — and nothing else. **Extraction mechanics are handled silently, never reported:** conditional `[IF YES]` rows, section-header rows that carry no question, which columns hold the answers, format tallies, numbering quirks. The user is confirming one thing — that you found their questionnaire correctly — not reviewing your parsing. Surface a note ONLY when extraction is genuinely ambiguous and the answer would change what gets filled (e.g. two plausible question columns, or a section you could not read at all); then ask about that one thing. The same restraint applies to every later stage: the shortest card that still lets the user decide.
    2. **Batch answer:** call `answer_questionnaire_question` once per question, verbatim, same `client_id` throughout. Never skip, never reorder, never merge questions.
    3. **Review by exception — three queues, in this order:**
       Every answer the engine returns is a SUGGESTION carrying keep / edit / remove — there is no answer the system decides for the user (Roee, 2026-08-26). The queues below change only HOW MANY suggestions the user confirms at once, never whether they confirm.
