@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.29
+version: 1.0.30
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -69,7 +69,7 @@ The engine version comes from the live server, so it reports what is actually ru
 <one stage line: Reading your questionnaire · Confirm before we start · Suggested answers, ready to keep · Proposed answer i of N · Questions we could not answer · Export>
 ```
 
-   **These cards render in English, whatever language the conversation is in.** They are product surface, and the engine's own cards are English (`SUGGESTED ANSWER`, `WHERE THIS COMES FROM`, `RELATED LAW`) — a card that switches language mid-flow shows the user two products, and mixing right-to-left text with the English header and rule mangles the layout outright. Talk to the user in their language around the cards; the cards themselves stay English. Never drop the header to save space and never restyle it.
+   The wordmark and the stage line stay in English (they are the brand); everything else follows the user's language, the same as the rest of the conversation. Never drop the header to save space, and never restyle it — it is the same mark the engine prints, and the user should see one product, not two. Note that the engine's own cards (`SUGGESTED ANSWER`, `WHERE THIS COMES FROM`, `RELATED LAW`) are always English and are shown verbatim, so a non-English session mixes the two by design; keep your own lines short in that case, because long right-to-left lines next to the English header wrap badly.
 
    **Inside an AskUserQuestion widget, use the one-line header only** — `**LegalLoop.  ·  Questionnaire — <Company>**` followed by the stage line on its own line. Omit the `═══` rule there: widgets wrap it and it collapses into the text. Keep the full header with its rule in ordinary message output.
 
