@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.1.1
+version: 1.2.0
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -97,16 +97,32 @@ Source: <the document and section it came from>
       - **Pasted text:** treat the paste as the document.
       If a URL fetch fails, the document is not link-shared — ask the user to share it or attach the file, and never guess its contents. Always state the source you actually read (URL or path) in the extraction summary.
    1. **Extract and confirm (one checkpoint) — keep it short.** Read the document and extract every question: its own numbering, section, verbatim text, and answer format. Then show a SHORT summary — the source you read, the total, the per-section counts, and the question "start?" — and nothing else. **Extraction mechanics are handled silently, never reported:** conditional `[IF YES]` rows, section-header rows that carry no question, which columns hold the answers, format tallies, numbering quirks. The user is confirming one thing — that you found their questionnaire correctly — not reviewing your parsing. Surface a note ONLY when extraction is genuinely ambiguous and the answer would change what gets filled (e.g. two plausible question columns, or a section you could not read at all); then ask about that one thing. The same restraint applies to every later stage: the shortest card that still lets the user decide.
-   2-3. **Fill it in ONE PASS. Do not interview the user.** Filling and teaching are separate acts: this stage fills, it never asks the user to supply missing answers, and it never writes anything. Call `answer_questionnaire_question` once per question, in document order, and build the completed form. Then hand back ONE result in which every question carries its state:
+   2-3. **Fill it in ONE PASS, with ONE tool call, and hand back a table.** Filling and teaching are separate acts: this stage fills, it never interviews the user, and it never writes anything.
 
-      - **Answered** — the suggestion, with the document and section it came from.
-      - **Needs you** — nothing in the profile answers this. If a related detail exists but does not actually answer the question, show it as `related, not an answer` so the user can judge; otherwise leave it empty. Never invent, never stretch a near-match into an answer.
+      **Use `answer_questionnaire_batch`** — every question in one call, each with its own number from the document. Never loop `answer_questionnaire_question` over a questionnaire: sixty separate calls hit per-response tool-call caps and the run dies mid-form. One call always completes.
 
-      No cards, no per-question prompts, no section digests, no tallies, no commentary. The user gets their form back filled as far as it honestly goes, sees exactly where they are needed, and edits in their own tool. That is the value: a form that arrives mostly done, in seconds, with every answer traceable.
+      Render the result as ONE table, never as raw rows and never as prose:
 
-      If you run out of room mid-run, say which question you stopped at and resume there on "continue".
+```
+**LegalLoop.  ·  Questionnaire — <Company>**
+════════════════════════════════════════════════════
+<N> of <M> answered from your company profile · <k> need you · <f> carry a legal note
 
-   3b. **Then, once, offer to learn.** After the export, tell the user in one line how many questions needed them, and offer the separate learning flow (`/ll learn`) so those questions are answered from the profile next time. Do not start it, do not ask about individual answers — one sentence, then stop.
+| # | Question | Suggested answer | Source | ⚖ |
+|---|----------|------------------|--------|---|
+| 2.3 | Inputs used for training? | No — Models contractually restricted… | Enterprise AI Services Agreement §3.11 | |
+| 2.8 | Outputs retained, how long? | As long as necessary; no numeric periods | Privacy Policy — Retention | ⚖ |
+| 3.1 | Which LLM is used? | **needs you** | | |
+```
+
+      Keep the Question and Suggested answer columns short enough to read — the full text is available if the user asks for a row. `needs you` is the only thing in the answer column when the profile does not cover it; never invent, never stretch a near-match, never explain why it is missing.
+
+   3b. **Legal review — deterministic, never your own judgement.** Rows the batch marks `LEGAL NOTE` carry a flag from Legal Loop's encoded law: reproduce it verbatim with its citation and link, under a short `Legal notes` heading below the table. These come from the law encoded against that company detail — they are not an opinion. **Never add legal commentary of your own, never infer a risk the engine did not flag, and never tell the user an answer is or is not compliant.** If a user wants a real determination on a question, that is legal-analysis mode on the relevant framework, run properly with its own clarification questions.
+
+   3c. **Then offer actions, and stop.** One short list, no prompting through questions:
+      - `Download the filled form` — goes to the export step.
+      - `Change an answer` — the user names a row (`edit 2.8`); show that ONE question as a card (question, suggested answer, source) with keep / edit / remove, apply it, return to the table. Repeat only as long as they keep naming rows.
+      - `Teach the profile` — one line: the questions that need them can be answered from the profile next time via `/ll learn`. Do not start it here.
 
    4. **Export — ask how they want it, then produce exactly that.** When the review is done, ask ONE question ("How would you like the completed questionnaire?") via AskUserQuestion when available, with these options:
         1. **Original format** — for a spreadsheet source, the filled sheet in its original column layout so it re-imports where it came from; for a PDF/doc source, an answer sheet mapped 1:1 to the document's own numbering.
