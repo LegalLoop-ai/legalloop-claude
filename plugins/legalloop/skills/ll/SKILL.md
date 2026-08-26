@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.31
+version: 1.0.32
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -71,7 +71,19 @@ The engine version comes from the live server, so it reports what is actually ru
 
    The wordmark and the stage line stay in English (they are the brand); everything else follows the user's language, the same as the rest of the conversation. Never drop the header to save space, and never restyle it — it is the same mark the engine prints, and the user should see one product, not two. Note that the engine's own cards (`SUGGESTED ANSWER`, `WHERE THIS COMES FROM`, `RELATED LAW`) are always English and are shown verbatim, so a non-English session mixes the two by design; keep your own lines short in that case, because long right-to-left lines next to the English header wrap badly.
 
-   **Inside an AskUserQuestion widget, use the one-line header only** — `**LegalLoop.  ·  Questionnaire — <Company>**` followed by the stage line on its own line. Omit the `═══` rule there: widgets wrap it and it collapses into the text. Keep the full header with its rule in ordinary message output.
+   **Inside an AskUserQuestion widget the card is exactly four things, in this order, and nothing else:**
+
+```
+**LegalLoop.  ·  Questionnaire — <Company>**
+
+<question number> — <the question, verbatim>
+
+<the suggested answer>
+
+Source: <the document and section it came from>
+```
+
+   No `═══` rule (widgets wrap it into the body text), no stage line, no basis line, no counts, no preamble, no explanation. Question, suggested answer, source. The full header with its rule belongs only in ordinary message output.
 
    **Never show internal machinery.** Detail identifiers (`training_default`, `subprocessors`, …), match scores, tool names, and "which detail answered which questions" tables are debugging output, not a customer experience. Refer to a detail by what it says, never by its id. The user sees questions, suggested answers, and sources — nothing about how the lookup works.
 
@@ -116,7 +128,7 @@ Filled 5 of 8 · 3 need you
         The derivation is yours, so it is never silent: a derived pick never goes to bulk-keep. If the detail does not clearly determine the pick for that phrasing (a mixed detail like "ISO held, SOC 2 in progress" against "do you have SOC 2?"), propose no pick — show the detail and let the user choose.
       - **Weak matches — their own step, never merged with picks:** when the matched fact does not actually answer the question asked (routed to the right neighborhood, wrong content), list them as a separate group with a recommendation to gap them; the user decides on that group alone. Do not mix them into the proposed-picks confirmation — approving derived answers and discarding misroutes are different decisions and each gets its own step.
       - **Review:** single-source suggestions and anything carrying a related-law block or consistency note → individual cards, keep / edit / remove each (same widget rules as clarification cards).
-      - **Gaps, grouped last:** list the unanswered questions together; collect the user's answers; offer each collected answer back into the fact-base with the user as its source (the learn-back loop — the next questionnaire has fewer gaps by construction).
+      - **Gaps, listed last and plainly:** the unanswered questions as a bare list — number and short question, nothing else. **Do not explain why any of them is unanswered**, do not group them into themes, do not describe what your materials do or do not cover. The user can see the list. Offer once to collect answers, and record whatever they give with them as the source (the learn-back loop — the next questionnaire has fewer gaps by construction).
    4. **Export — ask how they want it, then produce exactly that.** When the review is done, ask ONE question ("How would you like the completed questionnaire?") via AskUserQuestion when available, with these options:
         1. **Original format** — for a spreadsheet source, the filled sheet in its original column layout so it re-imports where it came from; for a PDF/doc source, an answer sheet mapped 1:1 to the document's own numbering.
         2. **Markdown document** — the questionnaire with its answers, readable and pasteable.
