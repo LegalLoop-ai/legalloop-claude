@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.34
+version: 1.0.35
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -97,41 +97,21 @@ Source: <the document and section it came from>
       - **Pasted text:** treat the paste as the document.
       If a URL fetch fails, the document is not link-shared — ask the user to share it or attach the file, and never guess its contents. Always state the source you actually read (URL or path) in the extraction summary.
    1. **Extract and confirm (one checkpoint) — keep it short.** Read the document and extract every question: its own numbering, section, verbatim text, and answer format. Then show a SHORT summary — the source you read, the total, the per-section counts, and the question "start?" — and nothing else. **Extraction mechanics are handled silently, never reported:** conditional `[IF YES]` rows, section-header rows that carry no question, which columns hold the answers, format tallies, numbering quirks. The user is confirming one thing — that you found their questionnaire correctly — not reviewing your parsing. Surface a note ONLY when extraction is genuinely ambiguous and the answer would change what gets filled (e.g. two plausible question columns, or a section you could not read at all); then ask about that one thing. The same restraint applies to every later stage: the shortest card that still lets the user decide.
-   2. **Answer SECTION BY SECTION, not all at once.** A 60-question questionnaire does not fit in one response on every client — some cap tool calls per turn — and a run that dies at question 47 with nothing to show is worse than no run at all. So work one section at a time: call `answer_questionnaire_question` for every question in the current section (verbatim, same `client_id`, never skipped, reordered, or merged), then immediately present THAT SECTION'S review (stage 3) before starting the next. The user sees value from the first section instead of waiting for all of them.
-      - Open each section with `Section i of N · <section name> · <k> questions` under the standard header.
-      - Never stop because answers came back empty. A questionnaire's opening section is usually the part a company profile covers least — it asks how the CUSTOMER will use the product, which only they can answer — so early gaps say nothing about later coverage.
-      - **If you run out of room mid-run**, say exactly where you stopped and that the user can say "continue" to resume — then resume at the next unanswered question, never re-asking what is already answered.
-      - When every section is done, close with one line: how many of the total now carry a suggestion. If the finished run is mostly gaps, say so plainly and point at the fix — the company profile page, where the user adds what is missing once and every future questionnaire benefits. Never present a near-empty questionnaire as a result.
-      **Show the fill happening.** This is the experience: the user watches their questionnaire being filled, question by question, in document order. As each answer comes back, print one compact line — the question's number, a short form of the question, and the arrow result — so the section reads like a form being completed. A line has exactly TWO possible results: the suggested answer in one short clause, or `not in your materials`. Never explain the matching — no "matched the sub-processor text", no "off-target", no detail names, no scores. If a returned suggestion does not actually answer the question asked, the line reads `not in your materials` and it joins the gap list; the reasoning stays invisible:
+   2-3. **Walk the questionnaire ONE CARD PER QUESTION. No lists, no summaries, no section digests.** This is the whole experience: the user moves through their own form, one question at a time, with an answer already filled in for them.
 
-```
-**LegalLoop.  ·  Questionnaire — Artlist Ltd.**
-════════════════════════════════════════════════════
-Section 2 of 7 · Data Privacy, Retention, and Deletion · 8 questions
+      The loop, for every question in document order:
+      a. Call `answer_questionnaire_question` for that one question, verbatim.
+      b. Show ONE card and wait for the user. Never print a running list of results, never a section digest, never a tally, never a comment about what a section covers or how coverage is going. The only text between cards is the card itself.
+      c. Record what the user chose and move to the next question.
 
-2.1  Anonymous use of the product?          → No — usage is account-linked, not anonymized
-2.2  Transparent notice of AI interaction?  → not in your materials
-2.3  Inputs used for training?              → No — Models contractually restricted from training
-...
-```
+      **When the profile has an answer** — card options, in this order: `Keep` (the proposed answer, first so it is the default), `Edit`, `Remove`, `Approve all remaining`.
 
-      Nothing after the last line of a section — no tally, no "filled N of M", no comment. Go straight into the next section's header.
+      **When the profile has no answer** — the same card shape, with the answer line reading `No answer in your materials` — then ask the user for it rather than moving on silently. Options: `Type the answer` (their free text becomes the answer, recorded with them as its source), `Leave blank`, `Leave all remaining blanks`. One question, one card, exactly as above — never collect gaps into a list and never explain why the answer is missing.
 
-      Suggestions are filled in AUTOMATICALLY as the pass runs — do not stop to ask about each one, and do not re-print a filled answer as its own card afterwards; the user has already seen it. **No commentary between sections** — no prose about what the section covers, no per-section tallies, no encouragement. Move straight to the next section. One closing line at the very end gives the total.
-      Keep the review afterwards NARROW (stage 3): a filled answer is kept as filled unless it carries a contradiction, a related-law block, or a constrained pick you could not derive with confidence. "Single source" alone is not a reason to interrupt — it is already visible on the card's Basis line if the user opens it.
+      Track position in the card's stage line (`Question 12 of 60 · Data Privacy`) so the user always knows where they are. Never stop early because answers are coming back empty — a questionnaire's opening section asks how the CUSTOMER will use the product, which only they can answer, so early gaps say nothing about later coverage. If you run out of room mid-run, say exactly which question you stopped at and resume there on "continue", never re-asking anything already answered.
 
-   3. **Then review only what needs you — ONE question at a time, at the end of the whole run** (not per section). Each is a single interactive card with keep / edit / remove; never a batch of cards printed as text. Only three things qualify:
-      Every answer the engine returns is a SUGGESTION carrying keep / edit / remove — there is no answer the system decides for the user (Roee, 2026-08-26). Filling them in automatically during the pass is not deciding: nothing leaves the conversation until the user approves the export. The queues below change only HOW MANY suggestions the user confirms at once, never whether they confirm.
-      - **Bulk-keep:** suggestions with no related-law block, no consistency note, not evidence-required, AND a settled basis — the card's Basis line reads "from your legal documents" or "consistent across N of your documents and prior answers" → ONE compact table (id · one-line suggestion) with a single keep-all confirmation, which IS the user's keep action for those rows. Any row the user names moves to the review queue instead. Suggestions whose Basis reads "from a single prior answer" never go here.
-      - **Constrained answers (yes/no or multiple choice) — ONE CARD PER QUESTION, never a batched list.** When the answer format is a constrained pick, derive the pick from the returned detail for that question's exact phrasing, then show it as its own card carrying three things in this order: **the questionnaire question verbatim**, **the proposed answer**, and **where it came from** (the source lines and the Basis). Options, in this order:
-        1. the proposed pick, worded as the pick itself (e.g. `Yes` or `No`) and marked `(proposed)` — FIRST, so it is the default selection, with the supporting detail as its description;
-        2. the alternative pick(s);
-        3. `Leave blank`;
-        4. `Approve all remaining` — fills every remaining constrained pick with its own proposal without asking again, for a user who does not want to review one at a time.
-        The derivation is yours, so it is never silent: a derived pick never goes to bulk-keep. If the detail does not clearly determine the pick for that phrasing (a mixed detail like "ISO held, SOC 2 in progress" against "do you have SOC 2?"), propose no pick — show the detail and let the user choose.
-      - **Weak matches — their own step, never merged with picks:** when the matched fact does not actually answer the question asked (routed to the right neighborhood, wrong content), list them as a separate group with a recommendation to gap them; the user decides on that group alone. Do not mix them into the proposed-picks confirmation — approving derived answers and discarding misroutes are different decisions and each gets its own step.
-      - **Review:** single-source suggestions and anything carrying a related-law block or consistency note → individual cards, keep / edit / remove each (same widget rules as clarification cards).
-      - **Gaps, listed last and plainly:** the unanswered questions as a bare list — number and short question, nothing else. **Do not explain why any of them is unanswered**, do not group them into themes, do not describe what your materials do or do not cover. The user can see the list. Offer once to collect answers, and record whatever they give with them as the source (the learn-back loop — the next questionnaire has fewer gaps by construction).
+      `Approve all remaining` and `Leave all remaining blanks` are the escapes for a user who does not want 60 cards: after either, finish the rest silently and go to export.
+
    4. **Export — ask how they want it, then produce exactly that.** When the review is done, ask ONE question ("How would you like the completed questionnaire?") via AskUserQuestion when available, with these options:
         1. **Original format** — for a spreadsheet source, the filled sheet in its original column layout so it re-imports where it came from; for a PDF/doc source, an answer sheet mapped 1:1 to the document's own numbering.
         2. **Markdown document** — the questionnaire with its answers, readable and pasteable.
