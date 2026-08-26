@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.4.0
+version: 1.5.0
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -58,6 +58,13 @@ Coverage  <N> frameworks encoded
 ```
 
 The engine version comes from the live server, so it reports what is actually running, not what your cached tool schema claims. If the two versions differ that is expected — the skill and the engine are versioned separately.
+
+0c-review. **Review mode (a questionnaire that is already answered).** Triggered by `/ll review <document>`, "check this filled questionnaire", "we already answered this — is it right?", or an uploaded completed form. Distinct from fill mode: nothing is filled and nothing is written.
+   1. Read the document the same way fill mode does (PDF, spreadsheet, Doc, paste; never the pasted `/edit` link).
+   2. Extract every ANSWERED question — number, question verbatim, and the answer exactly as it appears.
+   3. Call `review_filled_questionnaire` once with all of them.
+   4. Present what it returns: the side-by-side pairs (their answer beside the position their own documents record, with sources) and the findings list. **Where the two differ, show both and say nothing more** — never declare their answer wrong, never say an answer is or is not compliant, never add a finding of your own. The user reads the pair and decides; that judgement is theirs and the tool deliberately does not make it.
+   5. Offer the actions card afterwards: `Change an answer`, `Review it again`, `Done`.
 
 0c. **Fill mode (a whole questionnaire).** When the user provides an entire questionnaire — a file, a pasted list of questions, or "fill this questionnaire" — do NOT answer inline question-by-question. Four stages.
 
