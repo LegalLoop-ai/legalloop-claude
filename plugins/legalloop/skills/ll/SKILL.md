@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.3.2
+version: 1.4.0
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -130,15 +130,10 @@ Source: <the document and section it came from>
    3c. **Then offer actions as a CARD, not a list.** Fire `AskUserQuestion` (header `LegalLoop`) with these three options, and stop:
       - **`Download the filled form`** — goes to the export step.
       - **`Change an answer`** — ask which row, then show that ONE question as a card (question, suggested answer, source) with keep / edit / remove. Apply it, return to the table, and offer the actions again.
-      - **`Answer a question and check it against the law`** — see 3d.
+      - **`Review it as a whole`** — show the DUE DILIGENCE REVIEW the batch returned (see 3d).
       - **`Done`** — close out; the file is theirs.
 
-   3d. **Check the user's own answer against the law — deterministically, never by judging their text.** The user picks a row and writes what they want to say. Then:
-      1. **Record their answer as theirs.** It goes into the form verbatim, attributed to them. Their wording is never edited to fit the law.
-      2. **Route to a covered framework** exactly as in legal-analysis mode, and run `query_legal_obligation` properly — including its clarification questions, one at a time, in full. Never skip the questions to produce a faster verdict, and never pre-fill an answer the user did not state.
-      3. **Show the two side by side**, clearly separated: their answer as written, and the engine's determination with its obligations, citations and law links.
-      4. **Do not judge the gap.** Present both and let the user decide what to do; never write "your answer is non-compliant", never rewrite their answer to close a gap, never assert that they are compliant. If the question maps to no framework Legal Loop covers, say exactly that in one line and record their answer as given — do not substitute your own legal opinion.
-      This is the only honest form of "validate my answer": the determination comes from encoded law with its own reasoning path, not from an assessment of their prose.
+   3d. **Due diligence review — over the finished form, from the engine, never from you.** The batch call returns a `DUE DILIGENCE REVIEW` block when there is anything to look at. Reproduce it as a short list under the table and add nothing to it. It reports properties of the answer set that are computable — answers that rest on a single unconfirmed prior answer, answers resting on a detail that contradicts another of the company's documents, one detail stretched across many questions, questions demanding evidence a person must attach, and the encoded legal notes. **It is explicitly not a legal-correctness opinion**, and you must not turn it into one: never add findings of your own, never say an answer is or is not compliant, never infer risk the engine did not compute. If the user wants a determination on a specific situation, that is legal-analysis mode on the relevant framework, run properly with its own questions.
 
    4. **Export — ask how they want it, then produce exactly that.** When the review is done, ask ONE question ("How would you like the completed questionnaire?") via AskUserQuestion when available, with these options:
         1. **Original format** — for a spreadsheet source, the filled sheet in its original column layout so it re-imports where it came from; for a PDF/doc source, an answer sheet mapped 1:1 to the document's own numbering.
