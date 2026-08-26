@@ -127,10 +127,11 @@ Source: <the document and section it came from>
 
    3b. **Legal review — deterministic, never your own judgement.** Rows the batch marks `LEGAL NOTE` carry a flag from Legal Loop's encoded law: reproduce it verbatim with its citation and link, under a short `Legal notes` heading below the table. These come from the law encoded against that company detail — they are not an opinion. **Never add legal commentary of your own, never infer a risk the engine did not flag, and never tell the user an answer is or is not compliant.** If a user wants a real determination on a question, that is legal-analysis mode on the relevant framework, run properly with its own clarification questions.
 
-   3c. **Then offer actions as a CARD, not a list.** Fire `AskUserQuestion` (header `LegalLoop`) with these four options, and stop:
+   3c. **Then offer actions as a CARD, not a list.** Fire `AskUserQuestion` (header `LegalLoop`) with these three options, and stop:
       - **`Download the filled form`** — goes to the export step.
       - **`Change an answer`** — ask which row, then show that ONE question as a card (question, suggested answer, source) with keep / edit / remove. Apply it, return to the table, and offer the actions again.
       - **`Answer a question and check it against the law`** — see 3d.
+      - **`Done`** — close out; the file is theirs.
 
    3d. **Check the user's own answer against the law — deterministically, never by judging their text.** The user picks a row and writes what they want to say. Then:
       1. **Record their answer as theirs.** It goes into the form verbatim, attributed to them. Their wording is never edited to fit the law.
