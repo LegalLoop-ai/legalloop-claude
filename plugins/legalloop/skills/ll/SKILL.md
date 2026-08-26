@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.2.0
+version: 1.2.1
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -100,6 +100,8 @@ Source: <the document and section it came from>
    2-3. **Fill it in ONE PASS, with ONE tool call, and hand back a table.** Filling and teaching are separate acts: this stage fills, it never interviews the user, and it never writes anything.
 
       **Use `answer_questionnaire_batch`** — every question in one call, each with its own number from the document. Never loop `answer_questionnaire_question` over a questionnaire: sixty separate calls hit per-response tool-call caps and the run dies mid-form. One call always completes.
+
+      **If `answer_questionnaire_batch` is not in your tool list, stop and say so** — do not fall back to looping the single-question tool over a whole questionnaire, because that is exactly what runs out of tool calls half way through. Tell the user in one line that their Legal Loop connector needs reconnecting to pick up the batch tool (Settings → Connectors → toggle Legal Loop off and on), and wait. The single-question tool is for one-off questions, never for a form.
 
       Render the result as ONE table, never as raw rows and never as prose:
 
