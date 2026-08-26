@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.33
+version: 1.0.34
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -113,8 +113,9 @@ Section 2 of 7 · Data Privacy, Retention, and Deletion · 8 questions
 2.2  Transparent notice of AI interaction?  → not in your materials
 2.3  Inputs used for training?              → No — Models contractually restricted from training
 ...
-Filled 5 of 8 · 3 need you
 ```
+
+      Nothing after the last line of a section — no tally, no "filled N of M", no comment. Go straight into the next section's header.
 
       Suggestions are filled in AUTOMATICALLY as the pass runs — do not stop to ask about each one, and do not re-print a filled answer as its own card afterwards; the user has already seen it. **No commentary between sections** — no prose about what the section covers, no per-section tallies, no encouragement. Move straight to the next section. One closing line at the very end gives the total.
       Keep the review afterwards NARROW (stage 3): a filled answer is kept as filled unless it carries a contradiction, a related-law block, or a constrained pick you could not derive with confidence. "Single source" alone is not a reason to interrupt — it is already visible on the card's Basis line if the user opens it.
