@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.2.1
+version: 1.2.2
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -92,7 +92,11 @@ Source: <the document and section it came from>
    The four stages:
    0. **Getting the questionnaire** — accept whatever shape it arrives in:
       - **PDF** (the most common shape for security questionnaires): read it with your file-reading tool, all pages. Extract the document's own numbering, section headings, question text verbatim, and the answer format (yes/no, multiple choice with its options verbatim, free text, evidence upload). If the PDF has no text layer (a scan), say so plainly and ask for a text-based copy or a paste — never guess at scanned content.
-      - **Spreadsheet** (xlsx/csv, or a Google Sheets URL): read the file, or fetch the Sheet as CSV. **Never fetch the pasted `/edit` link — it is an application page, not a file, and the fetch always fails.** Take the document id out of the URL and request the export path directly: `https://docs.google.com/spreadsheets/d/<ID>/export?format=csv` (add `&gid=<GID>` if the link carries one). Same rule for a Google Doc: build `/export?format=txt` from the id rather than fetching the pasted link. Note which columns hold the question and which are for the answer — the filled export must land in those same columns.
+      - **Spreadsheet** (xlsx/csv, or a Google Sheets URL): try these in order and stop at the first that works.
+        1. **A connected Google Drive/Sheets connector, if this client has one** — open the document through it. This is the most reliable path and the only one that works on a sheet that is not link-shared.
+        2. **The export URL**, built from the document id: `https://docs.google.com/spreadsheets/d/<ID>/export?format=csv` (add `&gid=<GID>` if the link carries one). For a Google Doc, `/export?format=txt`.
+        3. **Ask for the file.** If both fail the document is not reachable — ask the user to attach it or to publish it (File → Share → Publish to web → CSV), and never guess its contents.
+        **Never fetch the pasted `/edit` link.** It is an application page rather than a file, the fetch fails every time, and the visible error makes a working run look broken. Note which columns hold the question and which are for the answer — the filled export must land in those same columns.
       - **Google Doc URL:** `/export?format=txt`. **Word doc:** read the file directly.
       - **Pasted text:** treat the paste as the document.
       If a URL fetch fails, the document is not link-shared — ask the user to share it or attach the file, and never guess its contents. Always state the source you actually read (URL or path) in the extraction summary.
