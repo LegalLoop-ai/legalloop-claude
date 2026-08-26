@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.2.3
+version: 1.2.4
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -69,7 +69,7 @@ The engine version comes from the live server, so it reports what is actually ru
 <one stage line: Reading your questionnaire · Confirm before we start · Suggested answers, ready to keep · Proposed answer i of N · Questions we could not answer · Export>
 ```
 
-   **Everything Legal Loop outputs is in English** (Tamir, 2026-08-26), whatever language the conversation is in: the cards, the filled answers, the states, the export, the stage lines. The engine's own cards are English already (`SUGGESTED ANSWER`, `WHERE THIS COMES FROM`, `RELATED LAW`) and are shown verbatim, so this keeps one voice instead of an English core wrapped in another language — and it avoids the layout mangling that mixing right-to-left text with the header and rule produces. Speak to the user in their language around the output if they wrote in one; the output itself stays English. Never drop the header to save space, and never restyle it.
+   **This entire flow is in English** (Tamir, 2026-08-26) — the cards, the answers, the states, the exports, the widget options, AND every sentence you write around them. Do not mirror the user's language here, even when they write to you in another one: `/ll` is product surface, not conversation. The engine's own cards are English already (`SUGGESTED ANSWER`, `WHERE THIS COMES FROM`, `RELATED LAW`) and are shown verbatim, so anything else in another language leaves an English core wrapped in a second voice — and mixing right-to-left text with the header and rule mangles the layout outright. Never drop the header to save space, and never restyle it.
 
    **Every point where the user chooses uses the click widget.** Whenever this flow asks the user to decide anything — start or not, keep / edit / remove on a row, which export format, keep a learn candidate — fire `AskUserQuestion` with the options rather than writing the question as text and waiting. Text-only questions leave the user typing answers that a click should handle, and they are easy to miss. If `AskUserQuestion` is not available on this client, then and only then ask in plain text and say what the choices are.
 
