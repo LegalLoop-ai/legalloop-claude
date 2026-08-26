@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.27
+version: 1.0.28
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -86,8 +86,24 @@ The engine version comes from the live server, so it reports what is actually ru
       - Never stop because answers came back empty. A questionnaire's opening section is usually the part a company profile covers least — it asks how the CUSTOMER will use the product, which only they can answer — so early gaps say nothing about later coverage.
       - **If you run out of room mid-run**, say exactly where you stopped and that the user can say "continue" to resume — then resume at the next unanswered question, never re-asking what is already answered.
       - When every section is done, close with one line: how many of the total now carry a suggestion. If the finished run is mostly gaps, say so plainly and point at the fix — the company profile page, where the user adds what is missing once and every future questionnaire benefits. Never present a near-empty questionnaire as a result.
-   3. **Review by exception — three queues, in this order:**
-      Every answer the engine returns is a SUGGESTION carrying keep / edit / remove — there is no answer the system decides for the user (Roee, 2026-08-26). The queues below change only HOW MANY suggestions the user confirms at once, never whether they confirm.
+      **Show the fill happening.** This is the experience: the user watches their questionnaire being filled, question by question, in document order. As each answer comes back, print one compact line — the question's number, a short form of the question, and the arrow result — so the section reads like a form being completed:
+
+```
+**LegalLoop.  ·  Questionnaire — Artlist Ltd.**
+════════════════════════════════════════════════════
+Section 2 of 7 · Data Privacy, Retention, and Deletion · 8 questions
+
+2.1  Anonymous use of the product?          → No — usage is account-linked, not anonymized
+2.2  Transparent notice of AI interaction?  → not in your materials
+2.3  Inputs used for training?              → No — Models contractually restricted from training
+...
+Filled 5 of 8 · 3 need you
+```
+
+      Suggestions are filled in AUTOMATICALLY as the pass runs — do not stop to ask about each one. Approval comes afterwards, and only for what actually needs a decision (stage 3). A line whose answer is a gap says "not in your materials" and nothing more; it is collected for the gap step, not discussed inline.
+
+   3. **Then review only what needs you** — in this order:
+      Every answer the engine returns is a SUGGESTION carrying keep / edit / remove — there is no answer the system decides for the user (Roee, 2026-08-26). Filling them in automatically during the pass is not deciding: nothing leaves the conversation until the user approves the export. The queues below change only HOW MANY suggestions the user confirms at once, never whether they confirm.
       - **Bulk-keep:** suggestions with no related-law block, no consistency note, not evidence-required, AND a settled basis — the card's Basis line reads "from your legal documents" or "consistent across N of your documents and prior answers" → ONE compact table (id · one-line suggestion) with a single keep-all confirmation, which IS the user's keep action for those rows. Any row the user names moves to the review queue instead. Suggestions whose Basis reads "from a single prior answer" never go here.
       - **Constrained answers (yes/no or multiple choice) — ONE CARD PER QUESTION, never a batched list.** When the answer format is a constrained pick, derive the pick from the returned detail for that question's exact phrasing, then show it as its own card carrying three things in this order: **the questionnaire question verbatim**, **the proposed answer**, and **where it came from** (the source lines and the Basis). Options, in this order:
         1. the proposed pick, worded as the pick itself (e.g. `Yes` or `No`) and marked `(proposed)` — FIRST, so it is the default selection, with the supporting detail as its description;
