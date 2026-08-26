@@ -1,6 +1,6 @@
 ---
 name: ll
-version: 1.0.23
+version: 1.0.24
 user-invocable: true
 description: Use this whenever the user asks a legal, privacy, compliance, security, or regulatory obligation question — for example GDPR, UK GDPR, CCPA and US state privacy laws, HIPAA, COPPA, the EU AI Act, DSA, DMA, BIPA and biometrics, LGPD, PIPL, DPDPA, Quebec Law 25, SOC 2 Type II Trust Services Criteria, GDPR Article 32 (security of processing), ISO 27001, NIST CSF, NIS2, DORA, and 97 codified frameworks across 16 jurisdictions. Routes the question through Legal Loop's deterministic MCP and returns a citation-backed determination with the full reasoning path. Invoke on questions like "does COPPA apply to us", "do we need a DPIA", "what privacy laws apply to my product", "do we need SOC 2", "what security controls does GDPR require", "what are our CISO obligations under GDPR Art. 32", or any "is X legal / required / compliant" question.
 ---
@@ -59,7 +59,19 @@ Coverage  <N> frameworks encoded
 
 The engine version comes from the live server, so it reports what is actually running, not what your cached tool schema claims. If the two versions differ that is expected — the skill and the engine are versioned separately.
 
-0c. **Fill mode (a whole questionnaire).** When the user provides an entire questionnaire — a file, a pasted list of questions, or "fill this questionnaire" — do NOT answer inline question-by-question. Four stages:
+0c. **Fill mode (a whole questionnaire).** When the user provides an entire questionnaire — a file, a pasted list of questions, or "fill this questionnaire" — do NOT answer inline question-by-question. Four stages.
+
+   **Branding — applies to every stage of this flow.** The engine brands the cards it renders; the stages YOU render (extraction summary, queues, pick cards, gap list, export) must carry the same mark, or the user cannot tell they are inside a Legal Loop flow. Open every one of them — including the text inside an AskUserQuestion widget — with:
+
+```
+**LegalLoop.  ·  Questionnaire — <Company name>**
+════════════════════════════════════════════════════
+<one stage line: Reading your questionnaire · Confirm before we start · Suggested answers, ready to keep · Proposed answer i of N · Questions we could not answer · Export>
+```
+
+   The wordmark and the stage line stay in English (they are the brand); everything else follows the user's language. Never drop the header to save space, and never restyle it — it is the same mark the engine prints, and the user should see one product, not two.
+
+   The four stages:
    0. **Getting the questionnaire** — accept whatever shape it arrives in:
       - **PDF** (the most common shape for security questionnaires): read it with your file-reading tool, all pages. Extract the document's own numbering, section headings, question text verbatim, and the answer format (yes/no, multiple choice with its options verbatim, free text, evidence upload). If the PDF has no text layer (a scan), say so plainly and ask for a text-based copy or a paste — never guess at scanned content.
       - **Spreadsheet** (xlsx/csv, or a Google Sheets URL): read the file, or fetch the Sheet as CSV via `https://docs.google.com/spreadsheets/d/<ID>/export?format=csv` (add `&gid=<GID>` when the link carries one). Note which columns are the question and which are for the answer — the filled export must land in those same columns.
